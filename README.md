@@ -1,2 +1,1 @@
-# Senior-Capstone-Project
-# NFL draft data analyzation
+NFL draft data analyzation
