@@ -19,4 +19,5 @@ The draft data is supplied by Pro Football Reference (https://www.pro-football-r
 Project Progress: So far for the project I have gathered the draft data from Pro Football Reference from 1993-2022 and transferred it into RStudio where I have finished up with making sure the data is clean for analyzation. I am now currently working on analyzing the data in R. I have finished up my outline for my paper and also have found a potential journal for my research paper.
 
 Milestone 1 Video: https://share.vidyard.com/watch/jQ4qwbNdimbU5vtRgixH6J?
-Milestone 2 Video: 
+
+Milestone 2 Video: https://share.vidyard.com/watch/L3nVr6HMy6yhFYGPF2JExW?
