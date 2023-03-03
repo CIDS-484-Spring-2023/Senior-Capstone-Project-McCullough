@@ -5,8 +5,81 @@ date: "2023-02-11"
 output: word_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#Loading cleaned draft data
+```{r}
+library(tidyverse)
+library(readxl)
+
+draft = read_excel('1993-2022draftStats.xlsx', col_names = TRUE)
+draft
+
+draft$wAV[is.na(draft$wAV)] = 0
+draft$DrAV[is.na(draft$DrAV)] = 0
+draft$G[is.na(draft$G)] = 0
+draft$Cmp[is.na(draft$Cmp)] = 0
+draft$PassAtt[is.na(draft$PassAtt)] = 0
+draft$PassYds[is.na(draft$PassYds)] = 0
+draft$PassTD[is.na(draft$PassTD)] = 0
+draft$`Int(O)`[is.na(draft$`Int(O)`)] = 0
+draft$RushAtt[is.na(draft$RushAtt)] = 0
+draft$RushYds[is.na(draft$RushYds)] = 0
+draft$RushTD[is.na(draft$RushTD)] = 0
+draft$Rec[is.na(draft$Rec)] = 0
+draft$RecYds[is.na(draft$RecYds)] = 0
+draft$RecTD[is.na(draft$RecTD)] = 0
+draft$Solo[is.na(draft$Solo)] = 0
+draft$`Int(D)`[is.na(draft$`Int(D)`)] = 0
+draft$Sk[is.na(draft$Sk)] = 0
+draft$`College/Univ`[3051] = "Bethel (TN)"
+draft$`College/Univ`[3145] = "Lousiana-Lafayette"
+draft$`College/Univ`[3149] = "Regina"
+draft$`College/Univ`[3170] = "Lousiana-Lafayette"
+draft$`College/Univ`[3229] = "California Polytechnic State"
+draft$`College/Univ`[3231] = "Missouri Western State"
+draft$`College/Univ`[3249] = "Georgia State"
+draft$`College/Univ`[3261] = "Alabama-Birmingham"
+draft$`College/Univ`[3516] = "Colorado State-Pueblo"
+draft$`College/Univ`[3555] = "Northeastern State"
+draft$`College/Univ`[4259] = "No college"
+draft$`College/Univ`[4818] = "No college"
+draft$`College/Univ`[6046] = "Eastern Michigan"
+draft$`College/Univ`[6843] = "Trinity International"
+draft$`College/Univ`[7097] = "Trinity International"
+draft$`College/Univ`[7296] = "Clark Atlanta"
+
+this = draft %>%
+  mutate(Fran = Tm)
+
+this = this %>%
+  mutate(Fran = replace(Fran, Fran == "PHO", "ARI")) %>%
+  mutate(Fran = replace(Fran, Fran == "SDG", "LAC")) %>%
+  mutate(Fran = replace(Fran, Fran == "STL", "LAR")) %>%
+  mutate(Fran = replace(Fran, Fran == "RAM", "LAR")) %>%
+  mutate(Fran = replace(Fran, Fran == "OAK", "LVR")) %>%
+  mutate(Fran = replace(Fran, Fran == "RAI", "LVR"))
 ```
 
+
+Pro Football Reference has provided a wAV stat which is the weigthed average value
+of each player and this is what I will be using to show how productive of a career
+a player had.
+```{r}
+draftPick = draft %>%
+  filter(Draft < 2011)
+
+ggplot(draftPick, aes(Pick, wAV)) +
+  geom_point()
+reg = lm(draft$wAV~draft$Pick)
+jtools :: summ(reg)
+anova(reg)
+```
+
+Which teams have had the most successful draft picks?
+```{r}
+teamDraftSuccess = this %>%
+  group_by(Fran) %>%
+  summarise(averagewAV = mean(wAV))
+teamDraftSuccess = arrange(teamDraftSuccess, desc(averagewAV))
+teamDraftSuccess
+```
 
