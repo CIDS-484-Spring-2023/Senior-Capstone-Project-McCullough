@@ -16,6 +16,7 @@ Project Description: This project will be a thorough investigation into the past
 
 The draft data is supplied by Pro Football Reference (https://www.pro-football-reference.com/years/1993/draft.htm). The majority of the analyzation will be done through R and Microsoft Excel where I will create various visualizations, tables, and solutions with the data.
 
-Project Progress: So far for the project I have gathered the draft data from Pro Football Reference from 1993-2022 and transferred it into RStudio where I am currently now working on making sure the data is clean for analyzation. I will then move forward with analyzing how valuable each draft pick is through R and then continue answering questions with this large dataset.
+Project Progress: So far for the project I have gathered the draft data from Pro Football Reference from 1993-2022 and transferred it into RStudio where I have finished up with making sure the data is clean for analyzation. I am now currently working on analyzing the data in R. I have finished up my outline for my paper and also have found a potential journal for my research paper.
 
 Milestone 1 Video: https://share.vidyard.com/watch/jQ4qwbNdimbU5vtRgixH6J?
+Milestone 2 Video: 
