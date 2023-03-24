@@ -23,8 +23,10 @@ https://www.iospress.com/catalog/journals/journal-of-sports-analytics#submission
 Target Journal example:
 https://content.iospress.com/articles/journal-of-sports-analytics/jsa200617
 
-Project Progress: So far for the project I have gathered the draft data from Pro Football Reference from 1993-2022 and transferred it into RStudio where I have finished up with making sure the data is clean for analyzation. I am now currently working on analyzing the data in R. I have finished up my outline for my paper and also have found a potential journal for my research paper.
+Project Progress: So far for the project I have gathered the draft data from Pro Football Reference from 1993-2022 and transferred it into RStudio where I have finished up with making sure the data is clean for analyzation. I have finished up my outline for my paper and also have found a potential journal for my research paper. I have now completed a majority of my research in R and now I am starting to move forward transferring and adding things to my rough draft.
 
 Milestone 1 Video: https://share.vidyard.com/watch/jQ4qwbNdimbU5vtRgixH6J?
 
 Milestone 2 Video: https://share.vidyard.com/watch/L3nVr6HMy6yhFYGPF2JExW?
+
+Milestone 3 Video: 
