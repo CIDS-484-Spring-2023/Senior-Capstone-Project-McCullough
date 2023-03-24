@@ -29,4 +29,4 @@ Milestone 1 Video: https://share.vidyard.com/watch/jQ4qwbNdimbU5vtRgixH6J?
 
 Milestone 2 Video: https://share.vidyard.com/watch/L3nVr6HMy6yhFYGPF2JExW?
 
-Milestone 3 Video: 
+Milestone 3 Video: https://share.vidyard.com/watch/tNKqqf71gDc6HxGikA5u5u?
