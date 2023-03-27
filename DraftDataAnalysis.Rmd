@@ -1,0 +1,219 @@
+---
+title: "DraftDataAnalysis"
+author: "Kyle McCullough"
+date: "2023-02-11"
+output: word_document
+---
+
+#Loading cleaned draft data
+```{r}
+library(tidyverse)
+library(readxl)
+library(ggplot2)
+library(nflplotR)
+
+draft = read_excel('1993-2022draftStats.xlsx', col_names = TRUE)
+draft
+
+draft$wAV[is.na(draft$wAV)] = 0
+draft$DrAV[is.na(draft$DrAV)] = 0
+draft$G[is.na(draft$G)] = 0
+draft$Cmp[is.na(draft$Cmp)] = 0
+draft$PassAtt[is.na(draft$PassAtt)] = 0
+draft$PassYds[is.na(draft$PassYds)] = 0
+draft$PassTD[is.na(draft$PassTD)] = 0
+draft$`Int(O)`[is.na(draft$`Int(O)`)] = 0
+draft$RushAtt[is.na(draft$RushAtt)] = 0
+draft$RushYds[is.na(draft$RushYds)] = 0
+draft$RushTD[is.na(draft$RushTD)] = 0
+draft$Rec[is.na(draft$Rec)] = 0
+draft$RecYds[is.na(draft$RecYds)] = 0
+draft$RecTD[is.na(draft$RecTD)] = 0
+draft$Solo[is.na(draft$Solo)] = 0
+draft$`Int(D)`[is.na(draft$`Int(D)`)] = 0
+draft$Sk[is.na(draft$Sk)] = 0
+draft$`College/Univ`[3051] = "Bethel (TN)"
+draft$`College/Univ`[3145] = "Lousiana-Lafayette"
+draft$`College/Univ`[3149] = "Regina"
+draft$`College/Univ`[3170] = "Lousiana-Lafayette"
+draft$`College/Univ`[3229] = "California Polytechnic State"
+draft$`College/Univ`[3231] = "Missouri Western State"
+draft$`College/Univ`[3249] = "Georgia State"
+draft$`College/Univ`[3261] = "Alabama-Birmingham"
+draft$`College/Univ`[3516] = "Colorado State-Pueblo"
+draft$`College/Univ`[3555] = "Northeastern State"
+draft$`College/Univ`[4259] = "No college"
+draft$`College/Univ`[4818] = "No college"
+draft$`College/Univ`[6046] = "Eastern Michigan"
+draft$`College/Univ`[6843] = "Trinity International"
+draft$`College/Univ`[7097] = "Trinity International"
+draft$`College/Univ`[7296] = "Clark Atlanta"
+
+this = draft %>%
+  mutate(Fran = Tm)
+
+this = this %>%
+  mutate(Fran = replace(Fran, Fran == "PHO", "ARI")) %>%
+  mutate(Fran = replace(Fran, Fran == "SDG", "LAC")) %>%
+  mutate(Fran = replace(Fran, Fran == "STL", "LAR")) %>%
+  mutate(Fran = replace(Fran, Fran == "RAM", "LAR")) %>%
+  mutate(Fran = replace(Fran, Fran == "OAK", "LVR")) %>%
+  mutate(Fran = replace(Fran, Fran == "RAI", "LVR"))
+
+draft = draft %>%
+  mutate(Pos = replace(Pos, Pos == "S", "DB")) %>%
+  mutate(Pos = replace(Pos, Pos == "CB", "DB"))
+```
+
+
+Pro Football Reference has provided a wAV stat which is the weigthed average value
+of each player and this is what I will be using to show how productive of a career
+a player had.
+```{r}
+draftPick = draft %>%
+  filter(Draft < 2011)
+
+reg1 = lm(draftPick$wAV~draftPick$Pick)
+reg2 = lm(draftPick$wAV~log(draftPick$Pick))
+jtools::export_summs(reg1, reg2, digits=3, statistics = c(N = "nobs",R2 = "r.squared",AIC = "AIC",BIC = "BIC"))
+
+draftPick %>% ggplot(aes(x = Pick, y = wAV)) +
+  geom_point() + 
+  stat_smooth(method = lm,
+              formula = y~log(x),
+              se = TRUE,
+              ) +
+  labs(title = "Average value of each draft pick",
+       subtitle = "Data from 1993 to 2010")
+
+plot.fitted <- function(lmod) {
+  require(ggplot2,dplyr)
+  df = lmod$model
+  title = paste("Residuals vs. Fits (Dependent Variable: ",
+                names(df)[1],
+                ")",
+                sep = "")
+  pr <- df %>% ggplot(aes(x = fitted(lmod), y = resid(lmod))) +
+    geom_ribbon(aes(ymin = -sigma(lmod), ymax = sigma(lmod)),
+                fill = "gray",
+                alpha = .5) +
+    geom_ribbon(aes(ymin = -sigma(lmod) * 2, ymax = sigma(lmod) * 2),
+                fill = "lightgray",
+                alpha = .5) +
+    geom_point() +
+    theme_classic() +
+    ggtitle(title) +
+    ylab("Residules") +
+    xlab("Fitted") +
+    geom_hline(yintercept = 0,
+               linetype = "solid",
+               color = "black")
+  return(pr)  
+}
+
+plot.fitted(reg1)
+plot.fitted(reg2)
+
+b = reg2$fitted.values
+PickValue = tibble(wAV = b, Pick = 1:4489)
+PickValue = PickValue %>%
+  filter(Pick < 256)
+PickValue
+```
+```{r}
+draftPick %>%
+  filter(Draft > 1993) %>%
+  group_by(Rnd) %>%
+  summarise(averagewAV = mean(wAV))
+```
+
+
+Which teams have had the most successful draft picks?
+```{r}
+teamDraftSuccess = this %>%
+  group_by(Fran) %>%
+  summarise(averagewAV = mean(wAV))
+teamDraftSuccess = arrange(teamDraftSuccess, desc(averagewAV))
+teamDraftSuccess
+
+teamDraftSuccess %>%
+  ggplot2::ggplot(aes(reorder(Fran, averagewAV), averagewAV)) +
+  nflplotR::geom_nfl_logos(aes(team_abbr = Fran), width = 0.065, alpha = 0.7) +
+  ggplot2::labs(title = "Average Value of Player Drafted by each Franchise",
+       subtitle = "From 1993 to 2022",
+       y = "Average Value per Player drafted",
+       x = "Franchise") +
+  ggplot2::theme(plot.title = ggplot2::element_text(face = "bold"),
+                 axis.text.x = element_blank(),
+                 axis.ticks.x = element_blank())
+```
+
+Which college has the best nfl prospects?
+```{r}
+draft %>%
+  group_by(`College/Univ`) %>%
+  summarise(sumwAV = sum(wAV)) %>%
+  arrange(desc(sumwAV))
+
+draft %>%
+  filter(Draft < 2011) %>%
+  group_by(`College/Univ`) %>%
+  filter(n() > 19) %>%
+  summarise(averagewAV = mean(wAV)) %>%
+  arrange(desc(averagewAV))
+```
+
+```{r}
+draft %>%
+  filter(Pos == "WR") %>%
+  group_by(`College/Univ`) %>%
+  summarise(sumwAV = sum(wAV)) %>%
+  arrange(desc(sumwAV))
+
+draft %>%
+  filter(Pos == "WR") %>%
+  filter(`College/Univ` == "Ohio St.") %>%
+  arrange(desc(wAV))
+
+draft %>%
+  filter(Pos == "WR") %>%
+  filter(`College/Univ` == "LSU") %>%
+  arrange(desc(wAV))
+```
+```{r}
+draft %>%
+  filter(Pos == "DB") %>%
+  group_by(`College/Univ`) %>%
+  summarise(sumwAV = sum(wAV)) %>%
+  arrange(desc(sumwAV))
+
+draft %>%
+  filter(Pos == "DB") %>%
+  filter(`College/Univ` == "Alabama") %>%
+  arrange(desc(wAV))
+
+draft %>%
+  filter(Pos == "DB") %>%
+  filter(`College/Univ` == "LSU") %>%
+  arrange(desc(wAV))
+```
+
+
+```{r}
+draft %>%
+  filter(`College/Univ` == "Boston Col.") %>%
+  filter(Draft < 2011) %>%
+  arrange(desc(wAV))
+
+draft %>%
+  filter(`College/Univ` == "Miami (FL)") %>%
+  filter(Draft < 2011) %>%
+  arrange(desc(wAV))
+```
+
+```{r}
+draft %>%
+  filter(Player == "Tre'Davious White")
+```
+
+
