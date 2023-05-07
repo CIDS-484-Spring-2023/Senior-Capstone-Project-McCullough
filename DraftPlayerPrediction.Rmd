@@ -1,0 +1,178 @@
+---
+title: "Untitled"
+output: word_document
+date: "2023-04-21"
+---
+
+#load cleaned data
+```{r}
+library(tidyverse)
+library(readxl)
+library(dplyr)
+
+draft = read_excel('1993-2022draftStats.xlsx', col_names = TRUE)
+draft
+
+draft$wAV[is.na(draft$wAV)] = 0
+draft$DrAV[is.na(draft$DrAV)] = 0
+draft$G[is.na(draft$G)] = 0
+draft$Cmp[is.na(draft$Cmp)] = 0
+draft$PassAtt[is.na(draft$PassAtt)] = 0
+draft$PassYds[is.na(draft$PassYds)] = 0
+draft$PassTD[is.na(draft$PassTD)] = 0
+draft$`Int(O)`[is.na(draft$`Int(O)`)] = 0
+draft$RushAtt[is.na(draft$RushAtt)] = 0
+draft$RushYds[is.na(draft$RushYds)] = 0
+draft$RushTD[is.na(draft$RushTD)] = 0
+draft$Rec[is.na(draft$Rec)] = 0
+draft$RecYds[is.na(draft$RecYds)] = 0
+draft$RecTD[is.na(draft$RecTD)] = 0
+draft$Solo[is.na(draft$Solo)] = 0
+draft$`Int(D)`[is.na(draft$`Int(D)`)] = 0
+draft$Sk[is.na(draft$Sk)] = 0
+draft$`College/Univ`[3051] = "Bethel (TN)"
+draft$`College/Univ`[3145] = "Lousiana-Lafayette"
+draft$`College/Univ`[3149] = "Regina"
+draft$`College/Univ`[3170] = "Lousiana-Lafayette"
+draft$`College/Univ`[3229] = "California Polytechnic State"
+draft$`College/Univ`[3231] = "Missouri Western State"
+draft$`College/Univ`[3249] = "Georgia State"
+draft$`College/Univ`[3261] = "Alabama-Birmingham"
+draft$`College/Univ`[3516] = "Colorado State-Pueblo"
+draft$`College/Univ`[3555] = "Northeastern State"
+draft$`College/Univ`[4259] = "No college"
+draft$`College/Univ`[4818] = "No college"
+draft$`College/Univ`[6046] = "Eastern Michigan"
+draft$`College/Univ`[6843] = "Trinity International"
+draft$`College/Univ`[7097] = "Trinity International"
+draft$`College/Univ`[7296] = "Clark Atlanta"
+
+combine = read_excel('1993-2022combineData.xlsx', col_names = TRUE)
+combine
+
+colnames(combine)[1] <- "Draft"
+colnames(combine)[2] <- "Player"
+colnames(combine)[4] <- "Pos"
+combine = combine %>%
+  drop_na(Player)
+combine
+
+combinePast = combine %>%
+  filter(Draft < 2023) 
+
+combinePast = combinePast[,-3]
+combinePast = combinePast[,-3]
+
+draftCombine = merge(x = draft, y = combinePast, by = c("Player", "Draft"), all.x = TRUE)
+draftCombine
+```
+```{r}
+bigChartQB %>%
+  group_by(Conf) %>%
+  summarise(meanwAV = mean(wAV)) %>%
+  arrange(desc(meanwAV))
+
+bigChartQB %>%
+  group_by(level) %>%
+  summarise(meanwAV = mean(wAV)) %>%
+  arrange(desc(meanwAV))
+```
+
+```{r}
+bigChartQB %>% ggplot(aes(x = `Weight (lbs)`, y = wAV)) +
+  geom_point() + 
+  stat_smooth(method = lm,
+              formula = y~x^2,
+              se = TRUE,
+              )
+
+bigChartQB %>%
+  filter(complete.cases(`Height (in)`)) %>%
+  ggplot(aes(x = `Height (in)`, y = wAV)) +
+  geom_point()
+
+bigChartQB %>%
+  filter(complete.cases(`Weight (lbs)`)) %>%
+  ggplot(aes(x = `Weight (lbs)`, y = wAV)) +
+  geom_point()
+
+bigChartQB %>%
+  filter(complete.cases(`Hand Size (in)`)) %>%
+  ggplot(aes(x = `Hand Size (in)`, y = wAV)) +
+  geom_point()
+
+bigChartQB %>%
+  filter(complete.cases(`Arm Length (in)`)) %>%
+  ggplot(aes(x = `Arm Length (in)`, y = wAV)) +
+  geom_point()
+
+bigChartQB %>%
+  filter(complete.cases(Wonderlic)) %>%
+  ggplot(aes(x = Wonderlic, y = wAV)) +
+  geom_point()
+
+bigChartQB %>%
+  filter(complete.cases(`40 Yard`)) %>%
+  ggplot(aes(x = `40 Yard`, y = wAV)) +
+  geom_point()
+
+bigChartQB %>%
+  filter(complete.cases(`Vert Leap (in)`)) %>%
+  ggplot(aes(x = `Vert Leap (in)`, y = wAV)) +
+  geom_point()
+
+
+```
+```{r}
+mod1 = lm(bigChartQB$wAV~I(bigChartQB$`Arm Length (in)`^2))
+mod2 = lm(bigChartQB$wAV~bigChartQB$CollegeRAvg)
+jtools::export_summs(mod1, mod2, digits=3, statistics = c(N = "nobs",R2 = "r.squared",AIC = "AIC",BIC = "BIC"))
+```
+
+```{r}
+#all sig left
+regQB1 = lm(bigChartQB$wAV~bigChartQB$`Hand Size (in)` + bigChartQB$CollegeRYds + bigChartQB$CollegeRAvg)
+#all
+regQB2 = lm(bigChartQB$wAV ~ bigChartQB$`Height (in)` + bigChartQB$`Hand Size (in)` + bigChartQB$`Weight (lbs)` + bigChartQB$`Arm Length (in)`
+            + bigChartQB$`40 Yard` + bigChartQB$`Vert Leap (in)` + bigChartQB$`Broad Jump (in)` + bigChartQB$Shuttle + bigChartQB$`3Cone`
+            + bigChartQB$CollegeG + bigChartQB$CollegeAtt + bigChartQB$CollegeCmp + bigChartQB$CollegePct 
+            + bigChartQB$CollegeRYds + bigChartQB$CollegeYds + bigChartQB$`CollegeAY/A` + bigChartQB$`CollegeY/A` + bigChartQB$CollegeTD
+            + bigChartQB$CollegeInt + bigChartQB$CollegeRTD + bigChartQB$CollegeRate + bigChartQB$CollegeRAtt + bigChartQB$CollegeRAvg)
+#one by one
+regQB3 = lm(bigChartQB$wAV~bigChartQB$CollegeRYds)
+#one by one sig all
+regQB4 = lm(bigChartQB$wAV~bigChartQB$`Height (in)` + bigChartQB$`Weight (lbs)` + bigChartQB$`Hand Size (in)` + bigChartQB$`Vert Leap (in)` 
+            + bigChartQB$CollegePct)
+#one by one sig all left
+regQB5 = lm(bigChartQB$wAV~bigChartQB$`Hand Size (in)`)
+#one by one sig all each left
+regQB6 = lm(bigChartQB$wAV~bigChartQB$`Height (in)` + bigChartQB$CollegePct)
+#sig values: Height3, Weight2, HandSize2, Wonderlic2, Vertical Leap1, CollegePct1
+#not sig values: armlength, 40yard, BroadJump, Shuttle, 3Cone, CollegeG, CollegeCmp, CollegeAtt, CollegeYds, CollegeTD, CollegeAYA, CollegeYA, Int, Rate, Rush
+jtools::export_summs(regQB1, regQB2, regQB3, regQB4, regQB5, regQB6, digits=3, statistics = c(N = "nobs",R2 = "r.squared",AIC = "AIC",BIC = "BIC"))
+```
+```{r}
+Power5QB = bigChartQB %>%
+  filter(level == "Power")
+
+modP1 = lm(Power5QB$wAV~I(Power5QB$CollegeRAvg^2))
+modP2 = lm(Power5QB$wAV~Power5QB$CollegeRAvg)
+jtools::export_summs(modP1, modP2, digits=3, statistics = c(N = "nobs",R2 = "r.squared",AIC = "AIC",BIC = "BIC"))
+
+#sig values: Height2, CollegePct1, 
+regPQB = lm(Power5QB$wAV~I(Power5QB$`Height (in)`^2) + Power5QB$CollegePct)
+regPQBallquad = lm(Power5QB$wAV~I(Power5QB$`Height (in)`^2) + Power5QB$`Hand Size (in)` + Power5QB$`Weight (lbs)` + Power5QB$`Arm Length (in)`
+                   + I(Power5QB$`40 Yard`^2) + Power5QB$`Vert Leap (in)` + Power5QB$`Broad Jump (in)` + Power5QB$Shuttle + Power5QB$`3Cone`
+                   + Power5QB$CollegeG + I(Power5QB$CollegeAtt^2) + I(Power5QB$CollegeCmp^2) + Power5QB$CollegePct + I(Power5QB$CollegeRYds^2) 
+                   + I(Power5QB$CollegeYds^2) + Power5QB$`CollegeAY/A` + Power5QB$`CollegeY/A` + Power5QB$CollegeTD + Power5QB$CollegeInt
+                   + Power5QB$CollegeRTD + Power5QB$CollegeRate + Power5QB$CollegeRAtt + Power5QB$CollegeRAvg)
+regPQBall = lm(Power5QB$wAV ~ Power5QB$`Height (in)` + Power5QB$`Hand Size (in)` + Power5QB$`Weight (lbs)` + Power5QB$`Arm Length (in)`
+            + Power5QB$`40 Yard` + Power5QB$`Vert Leap (in)` + Power5QB$`Broad Jump (in)` + Power5QB$Shuttle + Power5QB$`3Cone`
+            + Power5QB$CollegeG + Power5QB$CollegeAtt + Power5QB$CollegeCmp + Power5QB$CollegePct 
+            + Power5QB$CollegeRYds + Power5QB$CollegeYds + Power5QB$`CollegeAY/A` + Power5QB$`CollegeY/A` + Power5QB$CollegeTD
+            + Power5QB$CollegeInt + Power5QB$CollegeRTD + Power5QB$CollegeRate + Power5QB$CollegeRAtt + Power5QB$CollegeRAvg)
+regPQBallsig = lm(Power5QB$wAV ~ Power5QB$`Height (in)` + Power5QB$`Hand Size (in)`+ Power5QB$`40 Yard` 
+            + Power5QB$CollegeYds + Power5QB$CollegeRAvg)
+jtools::export_summs(regPQB, regPQBallquad, regPQBall, regPQBallsig, digits=3, statistics = c(N = "nobs",R2 = "r.squared",AIC = "AIC",BIC = "BIC"))
+```
+
